@@ -1,4 +1,8 @@
 <!-- Appium Blueprint Explainer -->
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Appium Blueprint Explainer</title>
 <style>
   :root {
@@ -232,6 +236,8 @@
   .right {
     position: sticky;
     top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
   }
 
   #specPanel {
@@ -297,6 +303,64 @@
     margin: 0;
   }
 
+  .view-toggle {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px dashed var(--border-soft);
+  }
+
+  .view-toggle button {
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    border-radius: 2px;
+    padding: 0.4rem 0.5rem;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .view-toggle button:hover { color: var(--cyan); border-color: var(--cyan-dim); }
+
+  .view-toggle button.on {
+    color: var(--amber-strong);
+    border-color: var(--amber);
+    background: var(--amber-soft);
+  }
+
+  .explain-block { margin-top: 1.25rem; }
+
+  .explain-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0 0 0.6rem;
+  }
+
+  .explain-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border-soft);
+  }
+
+  .explain-blueprint .explain-label { color: var(--amber); }
+  .explain-cs .explain-label { color: var(--cyan); }
+  .explain-cs .spec-text { color: #d6e4ea; }
+
+  .view-blueprint .explain-cs,
+  .view-cs .explain-blueprint { display: none; }
+
   footer {
     margin-top: 2rem;
     font-family: var(--mono);
@@ -309,10 +373,12 @@
 
   @media (max-width: 880px) {
     main {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .right {
       position: static;
+      max-height: none;
+      overflow-y: visible;
     }
     .wrap {
       padding: 1.5rem 1.1rem 3rem;
@@ -327,7 +393,7 @@
   <header>
     <p class="kicker">Blueprint / conftest.py / rev. A</p>
     <h1>Appium Blueprint Explainer</h1>
-    <p class="instruction">You are the architect designing a drive-thru intercom system, not the crew running it. Click any highlighted term in the blueprint to view its spec.</p>
+    <p class="instruction">You are the architect designing a drive-thru intercom system, not the crew running it. Click any highlighted term in the blueprint to view its spec — each term shows both the drive-thru analogy and a standard CS explanation.</p>
     <div class="legend">
       <span class="swatch"><span class="dot fixture"></span>Fixture</span>
       <span class="swatch"><span class="dot decorator"></span>Decorator</span>
@@ -394,137 +460,176 @@
     "imp-pytest": {
       tag: "COMPONENT",
       code: "import pytest",
-      text: "You're pulling the inspection framework onto the drafting table. Pytest is the code inspector that will walk your finished intercom blueprint, run every fixture in order, and flag anything that doesn't meet spec — it isn't part of the intercom itself, it's how you verify the build."
+      text: "You're pulling the inspection framework onto the drafting table. Pytest is the code inspector that will walk your finished intercom blueprint, run every fixture in order, and flag anything that doesn't meet spec — it isn't part of the intercom itself, it's how you verify the build.",
+      cs: "pytest is a third-party Python testing framework. The import statement binds the module name pytest in this file's namespace so its API can be referenced. Its key features are test discovery (any function named test_*), plain assert statements for verification, and the fixture system used throughout this file. pytest is the test runner: it collects test functions, resolves the fixtures they request, executes them, and reports results."
     },
     "imp-webdriver": {
       tag: "COMPONENT",
       code: "from appium import webdriver",
-      text: "This pulls in the car-to-speaker connector: the client library that knows how to open a live link between a car and the intercom speaker, no matter which vehicle shows up to order."
+      text: "This pulls in the car-to-speaker connector: the client library that knows how to open a live link between a car and the intercom speaker, no matter which vehicle shows up to order.",
+      cs: "appium.webdriver is the module in the Appium Python client that contains the Remote class. It is a subclass of Selenium's WebDriver \u2014 an HTTP client that speaks the W3C WebDriver protocol. Every command you call on a driver (find element, tap, get text) is serialized as an HTTP request to the server and the JSON response is deserialized into a return value."
     },
     "imp-xcuioptions": {
       tag: "COMPONENT",
       code: "from appium.options.ios import XCUITestOptions",
-      text: "This pulls in the blank order-ticket template — a structured form for specifying exactly which vehicle and which menu build the intercom should expect before a car ever pulls up to the speaker."
+      text: "This pulls in the blank order-ticket template — a structured form for specifying exactly which vehicle and which menu build the intercom should expect before a car ever pulls up to the speaker.",
+      cs: "XCUITestOptions is a typed capabilities class from the Appium Python client. It builds the W3C capabilities dictionary that is sent when a new session is created, exposing each capability (platformName, appium:deviceName, appium:app, \u2026) as a Python attribute. Using a typed options object avoids hand-writing a raw dict with mistyped keys and applies driver-specific defaults, such as automationName = \"XCUITest\"."
     },
     "imp-appiumservice": {
       tag: "COMPONENT",
       code: "from appium.webdriver.appium_service import AppiumService",
-      text: "This imports the intercom hardware class itself — the schematic for the physical unit you're about to draft, commission, and eventually power down. Nothing is built yet; you've only brought the blueprint to the table."
+      text: "This imports the intercom hardware class itself — the schematic for the physical unit you're about to draft, commission, and eventually power down. Nothing is built yet; you've only brought the blueprint to the table.",
+      cs: "AppiumService is a helper class that manages the Appium server as a child process from Python. Internally it uses subprocess.Popen to launch the appium Node.js executable, polls its /status endpoint until the server is ready, and exposes start() and stop() to control the process lifecycle. It exists so tests can own the server lifecycle rather than depending on an externally started instance."
     },
     "const-host": {
       tag: "SPEC",
       code: 'APPIUM_HOST = "127.0.0.1"',
-      text: "This is the building and lane the intercom is wired to. 127.0.0.1 is the loopback address, so this intercom only ever talks to cars parked on this same lot — never a remote location across town."
+      text: "This is the building and lane the intercom is wired to. 127.0.0.1 is the loopback address, so this intercom only ever talks to cars parked on this same lot — never a remote location across town.",
+      cs: "A module-level constant holding the network interface the Appium server binds to and that the client connects to. 127.0.0.1 is the IPv4 loopback address: traffic sent there never leaves the machine, so the server is reachable only from local processes. Using UPPER_SNAKE_CASE signals by convention that the value is not meant to change at runtime."
     },
     "const-port": {
       tag: "SPEC",
       code: "APPIUM_PORT = 4723",
-      text: "This is the channel the intercom broadcasts on. Every car and every piece of infrastructure needs to be tuned to 4723, or the speaker and the vehicle simply never hear each other."
+      text: "This is the channel the intercom broadcasts on. Every car and every piece of infrastructure needs to be tuned to 4723, or the speaker and the vehicle simply never hear each other.",
+      cs: "A module-level constant for the TCP port the Appium server listens on. In client/server networking, an IP address identifies the host and a port number identifies a specific process on that host. 4723 is Appium's conventional default. Defining it once and referencing it from both the server args and the client URL ensures both sides agree on the endpoint."
     },
     "decorator-session": {
       tag: "DECORATOR",
       code: '@pytest.fixture(scope="session")',
-      text: "This is the permit stamped on the blueprint below: build this infrastructure once at the start of the shift and tear it down once at the end. It never gets rebuilt per car — that would be like re-pouring the intercom's foundation for every single order."
+      text: "This is the permit stamped on the blueprint below: build this infrastructure once at the start of the shift and tear it down once at the end. It never gets rebuilt per car — that would be like re-pouring the intercom's foundation for every single order.",
+      cs: "A decorator is a callable that takes a function and returns a wrapped or registered version of it; the @ syntax applies it at definition time. @pytest.fixture registers the function below as a fixture \u2014 a named provider of setup/teardown logic that tests (or other fixtures) request by parameter name. scope controls the fixture's lifetime and caching: scope=\"session\" means the fixture body runs once for the entire test run and its returned value is cached and shared by every test that requests it."
     },
     "fixture-appium-service": {
       tag: "FIXTURE",
       code: "def appium_service():",
-      text: "This names the infrastructure blueprint itself. Everything indented beneath it describes how to draft, commission, and eventually decommission the physical intercom unit that will serve the entire shift."
+      text: "This names the infrastructure blueprint itself. Everything indented beneath it describes how to draft, commission, and eventually decommission the physical intercom unit that will serve the entire shift.",
+      cs: "A plain Python function definition. Because of the decorator above it, pytest treats the function name appium_service as the fixture's identifier: any test or fixture that declares a parameter named appium_service will receive this function's yielded value. The function takes no parameters, meaning it has no dependencies on other fixtures."
     },
     "docstring": {
       tag: "NOTE",
       code: '"""Optional: manage the server lifecycle from pytest instead of assuming it\'s already running."""',
-      text: "A margin note on the blueprint: this whole fixture is optional. If another crew already has the intercom infrastructure standing and running before your shift starts, you don't need to draft or commission it yourself — just wire your cars to what's already live."
+      text: "A margin note on the blueprint: this whole fixture is optional. If another crew already has the intercom infrastructure standing and running before your shift starts, you don't need to draft or commission it yourself — just wire your cars to what's already live.",
+      cs: "A docstring is a string literal placed as the first statement in a function, class, or module. Python stores it in the object's __doc__ attribute, where documentation tools, IDEs, and help() can read it. It has no effect on execution; its role is to document intent \u2014 here, that this fixture is optional if an Appium server is already running."
     },
     "instantiate-service": {
       tag: "COMPONENT",
       code: "service = AppiumService()",
-      text: "This drafts the physical intercom unit and sets it on the table. The unit exists now, fully specified, but it isn't powered on yet — no car can talk to it until the next step commissions it."
+      text: "This drafts the physical intercom unit and sets it on the table. The unit exists now, fully specified, but it isn't powered on yet — no car can talk to it until the next step commissions it.",
+      cs: "Object instantiation: calling the class AppiumService() invokes its constructor (__init__) and returns a new instance, bound to the local variable service. At this point the object exists in memory with its internal state initialized (e.g. a None process handle), but no external process has been spawned yet."
     },
     "service-start": {
       tag: "PROCEDURE",
       code: 'service.start(args=["--address", APPIUM_HOST, "-p", str(APPIUM_PORT)], timeout_ms=20000)',
-      text: "This is the commissioning procedure — the moment the intercom unit actually powers on and starts listening at its assigned lane and channel. Click the highlighted pieces inside this line for what each setting controls."
+      text: "This is the commissioning procedure — the moment the intercom unit actually powers on and starts listening at its assigned lane and channel. Click the highlighted pieces inside this line for what each setting controls.",
+      cs: "Calling start() spawns the Appium server as a child process via Python's subprocess module. The args list is forwarded to the Appium CLI as command-line arguments. After launching, start() repeatedly issues HTTP GET requests to the server's /status endpoint (a health check) until it responds successfully or the timeout elapses, at which point it raises an error. The method blocks until the server is confirmed ready."
     },
     "flag-address": {
       tag: "SPEC",
       code: '"--address"',
-      text: "The flag that tells the commissioning crew which value that follows is the lane — the host — to wire this intercom unit to."
+      text: "The flag that tells the commissioning crew which value that follows is the lane — the host — to wire this intercom unit to.",
+      cs: "A command-line argument (a long-form CLI flag) passed to the Appium server process. The value that follows it, APPIUM_HOST, tells the server which network interface to bind its HTTP listener to. This mirrors running appium --address 127.0.0.1 in a terminal."
     },
     "flag-p": {
       tag: "SPEC",
       code: '"-p"',
-      text: "The flag that tells the commissioning crew which value that follows is the channel — the port — to tune this intercom unit to."
+      text: "The flag that tells the commissioning crew which value that follows is the channel — the port — to tune this intercom unit to.",
+      cs: "A short-form command-line flag, the alias for --port. The next argument, str(APPIUM_PORT), sets the TCP port the server listens on. CLI arguments are always strings, which is why the integer constant is converted with str()."
     },
     "timeout-ms": {
       tag: "SPEC",
       code: "timeout_ms=20000",
-      text: "How long the crew will wait for the intercom to finish booting before giving up and flagging a failed commissioning. Here, twenty seconds."
+      text: "How long the crew will wait for the intercom to finish booting before giving up and flagging a failed commissioning. Here, twenty seconds.",
+      cs: "A keyword argument specifying the maximum startup wait in milliseconds. AppiumService polls the server's /status endpoint in a loop; if the server has not responded successfully within 20,000 ms (20 s), start() gives up and raises an exception rather than blocking indefinitely. This is a standard startup-readiness timeout pattern for spawned services."
     },
     "yield-service": {
       tag: "HANDOFF",
       code: "yield service",
-      text: "This is the handoff point: the store is now open and running for the whole shift. Every car that pulls up between here and the closing procedure gets to use this same live, already-commissioned intercom."
+      text: "This is the handoff point: the store is now open and running for the whole shift. Every car that pulls up between here and the closing procedure gets to use this same live, already-commissioned intercom.",
+      cs: "The presence of yield makes this a generator function. pytest exploits generator semantics for fixtures: it runs the body up to yield (setup), passes the yielded object to the requesting test as the fixture value, and suspends the function. Once the fixture's scope ends, pytest resumes the generator so the code after yield runs (teardown). Because this fixture is session-scoped, execution pauses here for the entire test run."
     },
     "service-stop": {
       tag: "PROCEDURE",
       code: "service.stop()",
-      text: "The closing procedure — power the intercom unit down at the end of the shift. This runs once, after every car for the session has already been served."
+      text: "The closing procedure — power the intercom unit down at the end of the shift. This runs once, after every car for the session has already been served.",
+      cs: "Teardown code that executes after the generator resumes. stop() terminates the child process \u2014 sending a termination signal via the subprocess handle and waiting for it to exit \u2014 freeing the TCP port and cleaning up resources. pytest guarantees this runs at session end even if tests failed."
     },
     "decorator-function": {
       tag: "DECORATOR",
       code: '@pytest.fixture(scope="function")',
-      text: "This permit says the opposite of the session one: build a fresh instance of what's below for every single car. Nothing here is shared between visits — each car gets its own brand-new setup, torn down the moment it leaves."
+      text: "This permit says the opposite of the session one: build a fresh instance of what's below for every single car. Nothing here is shared between visits — each car gets its own brand-new setup, torn down the moment it leaves.",
+      cs: "The same fixture decorator with scope=\"function\", which is pytest's default scope. A function-scoped fixture is executed fresh for every test function that requests it: setup before the test, teardown immediately after. Nothing is cached between tests, giving each test an isolated instance and preventing state leakage between tests."
     },
     "fixture-driver": {
       tag: "FIXTURE",
       code: "def driver(appium_service):",
-      text: "This names a single car's visit to the speaker. It depends on the infrastructure blueprint above — pytest hands this fixture the already-commissioned intercom before the car is even allowed to pull forward."
+      text: "This names a single car's visit to the speaker. It depends on the infrastructure blueprint above — pytest hands this fixture the already-commissioned intercom before the car is even allowed to pull forward.",
+      cs: "A fixture that declares another fixture as a parameter. This is dependency injection: pytest inspects the signature, sees a parameter named appium_service, resolves that fixture first, and passes its value in. It also establishes ordering \u2014 the server fixture is guaranteed to have completed setup before this body runs. A function-scoped fixture may depend on a session-scoped one, but not the reverse."
     },
     "options-instantiate": {
       tag: "COMPONENT",
       code: "options = XCUITestOptions()",
-      text: "A blank order ticket is pulled off the pad for this specific car — the template exists, but no vehicle details have been filled in yet."
+      text: "A blank order ticket is pulled off the pad for this specific car — the template exists, but no vehicle details have been filled in yet.",
+      cs: "Instantiates an XCUITestOptions object, which is a builder for the W3C WebDriver capabilities. Capabilities are a JSON object sent in the POST /session request that tells the server what kind of session to create \u2014 platform, device, app, and driver-specific settings. The constructor pre-populates driver defaults such as automationName."
     },
     "options-platform": {
       tag: "SPEC",
       code: 'options.platform_name = "iOS"',
-      text: "The vehicle-type field on the order ticket. Marking it iOS tells the intercom which category of build instructions applies to this car before it even reaches the window."
+      text: "The vehicle-type field on the order ticket. Marking it iOS tells the intercom which category of build instructions applies to this car before it even reaches the window.",
+      cs: "Sets the standard W3C capability platformName. It is one of the few capabilities defined by the WebDriver specification itself (not vendor-prefixed). Appium uses it, together with automationName, to select which driver plugin handles the session \u2014 here the iOS XCUITest driver."
     },
     "options-device": {
       tag: "SPEC",
       code: 'options.device_name = "iPhone 16 Pro"',
-      text: "The exact-model field on the ticket — not just any car, specifically an iPhone 16 Pro, so the device queue knows precisely which vehicle to pull around to the speaker."
+      text: "The exact-model field on the ticket — not just any car, specifically an iPhone 16 Pro, so the device queue knows precisely which vehicle to pull around to the speaker.",
+      cs: "Sets the Appium-specific capability appium:deviceName. Vendor capabilities are namespaced with a prefix under W3C rules; the options class adds the appium: prefix automatically. For iOS simulators this string is matched against available simulator names in Xcode to decide which device to boot."
     },
     "options-app": {
       tag: "SPEC",
       code: 'options.app = "/Users/viradeth/Desktop/SDET_MASTER/StageTimePNW.app"',
-      text: "Which menu — which app build — this car should be served. This path points the intercom at the exact StageTimePNW build to load for the order."
+      text: "Which menu — which app build — this car should be served. This path points the intercom at the exact StageTimePNW build to load for the order.",
+      cs: "Sets the appium:app capability: an absolute filesystem path (or URL) to the application bundle under test. On session creation the XCUITest driver installs this .app onto the target simulator and launches it. Providing a full path avoids ambiguity about the working directory."
     },
     "automation-name-comment": {
       tag: "NOTE",
       code: "# automation_name defaults to XCUITest already inside XCUITestOptions,\n# so that line is redundant but harmless",
-      text: "A margin note on the blueprint: the order-ticket template already assumes XCUITest by default, so writing that field again wouldn't change anything served — harmless, just extra ink on the page."
+      text: "A margin note on the blueprint: the order-ticket template already assumes XCUITest by default, so writing that field again wouldn't change anything served — harmless, just extra ink on the page.",
+      cs: "A Python comment (ignored by the interpreter) noting that appium:automationName does not need to be set. XCUITestOptions is a driver-specific options class whose constructor already sets automationName to \"XCUITest\". Assigning it again would be redundant \u2014 the value would be identical \u2014 but not incorrect."
     },
     "driver-remote": {
       tag: "HANDOFF",
       code: 'driver = webdriver.Remote(f"http://{APPIUM_HOST}:{APPIUM_PORT}", options=options)',
-      text: "The car pulls up to the speaker and connects. The connector opens a live link to the intercom at its wired lane and channel, handing over the completed order ticket as it does."
+      text: "The car pulls up to the speaker and connects. The connector opens a live link to the intercom at its wired lane and channel, handing over the completed order ticket as it does.",
+      cs: "Instantiates a remote WebDriver client. The constructor sends an HTTP POST /session request to the given server URL with the capabilities from options in its JSON body. The server creates the session, launches the app, and returns a session ID. The resulting driver object stores that ID and uses it to route every subsequent command, following the W3C WebDriver protocol."
     },
     "yield-driver": {
       tag: "HANDOFF",
       code: "yield driver",
-      text: "The car is now at the window being served — this is the live handoff point where the actual test body runs against a fully connected car."
+      text: "The car is now at the window being served — this is the live handoff point where the actual test body runs against a fully connected car.",
+      cs: "The same generator-based setup/teardown split, now at function scope. pytest passes the live driver into the test as its fixture value and suspends here while the test body executes. When the test finishes \u2014 pass or fail \u2014 pytest resumes the generator to run the teardown below."
     },
     "driver-quit": {
       tag: "PROCEDURE",
       code: "driver.quit()",
-      text: "The car pulls away and the lane is wiped clean. Because this sits after the yield in a fixture, pytest guarantees it runs even if the test itself crashes, so a failed order never leaves the lane blocked."
+      text: "The car pulls away and the lane is wiped clean. Because this sits after the yield in a fixture, pytest guarantees it runs even if the test itself crashes, so a failed order never leaves the lane blocked.",
+      cs: "Ends the WebDriver session by sending HTTP DELETE /session/{sessionId} to the server, which closes the app and releases the simulator. Placing it after yield makes it teardown code that pytest guarantees to run even when the test raises, the same guarantee a try/finally block provides \u2014 so no orphaned sessions accumulate."
     }
   };
 
   var codeEl = document.getElementById("code");
   var specPanel = document.getElementById("specPanel");
+  var currentSpec = null;
+  var viewMode = "both";
+
+  specPanel.addEventListener("click", function (event) {
+    var btn = event.target.closest("[data-view]");
+    if (!btn) {
+      return;
+    }
+    viewMode = btn.getAttribute("data-view");
+    if (currentSpec) {
+      renderSpec(currentSpec);
+    }
+  });
 
   codeEl.addEventListener("click", function (event) {
     var tok = event.target.closest(".tok");
@@ -550,11 +655,31 @@
   });
 
   function renderSpec(spec) {
+    currentSpec = spec;
     var tagClass = "tag-" + spec.tag.toLowerCase();
+    specPanel.className = "panel view-" + viewMode;
     specPanel.innerHTML =
+      '<div class="view-toggle" role="group" aria-label="Explanation view">' +
+        toggleButton("both", "Both") +
+        toggleButton("blueprint", "Blueprint only") +
+        toggleButton("cs", "CS only") +
+      "</div>" +
       '<div class="spec-tag ' + tagClass + '">' + escapeHtml(spec.tag) + "</div>" +
       '<pre class="spec-code">' + escapeHtml(spec.code) + "</pre>" +
-      '<p class="spec-text">' + escapeHtml(spec.text) + "</p>";
+      '<div class="explain-block explain-blueprint">' +
+        '<p class="explain-label">Drive-Thru Blueprint</p>' +
+        '<p class="spec-text">' + escapeHtml(spec.text) + "</p>" +
+      "</div>" +
+      '<div class="explain-block explain-cs">' +
+        '<p class="explain-label">Standard CS Explanation</p>' +
+        '<p class="spec-text">' + escapeHtml(spec.cs) + "</p>" +
+      "</div>";
+  }
+
+  function toggleButton(mode, label) {
+    return '<button type="button" data-view="' + mode + '"' +
+      (viewMode === mode ? ' class="on" aria-pressed="true"' : ' aria-pressed="false"') +
+      ">" + label + "</button>";
   }
 
   function escapeHtml(str) {
