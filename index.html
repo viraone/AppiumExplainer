@@ -1,0 +1,565 @@
+<!-- Appium Blueprint Explainer -->
+<title>Appium Blueprint Explainer</title>
+<style>
+  :root {
+    --ink: #0a1420;
+    --ink-panel: #0e1c2e;
+    --ink-panel-2: #0c1826;
+    --grid-line: rgba(120, 205, 225, 0.07);
+    --grid-line-strong: rgba(120, 205, 225, 0.14);
+    --cyan: #7fd6e8;
+    --cyan-dim: rgba(127, 214, 232, 0.55);
+    --amber: #f2ab4e;
+    --amber-soft: rgba(242, 171, 78, 0.18);
+    --amber-strong: #ffcb7d;
+    --cream: #f3ecd9;
+    --prose: #e9e1cd;
+    --muted: #7d93a3;
+    --border: rgba(143, 214, 232, 0.22);
+    --border-soft: rgba(143, 214, 232, 0.12);
+    --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--prose);
+  }
+
+  body {
+    font-family: var(--serif);
+    background-image:
+      repeating-linear-gradient(0deg, var(--grid-line) 0, var(--grid-line) 1px, transparent 1px, transparent 24px),
+      repeating-linear-gradient(90deg, var(--grid-line) 0, var(--grid-line) 1px, transparent 1px, transparent 24px),
+      repeating-linear-gradient(0deg, var(--grid-line-strong) 0, var(--grid-line-strong) 1px, transparent 1px, transparent 120px),
+      repeating-linear-gradient(90deg, var(--grid-line-strong) 0, var(--grid-line-strong) 1px, transparent 1px, transparent 120px);
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2.25rem 1.75rem 4rem;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+    margin: 0 0 0.6rem;
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--cream);
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+    margin: 0 0 0.55rem;
+  }
+
+  header p.instruction {
+    font-family: var(--serif);
+    color: var(--muted);
+    font-size: 1rem;
+    margin: 0 0 1rem;
+    max-width: 62ch;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.9rem;
+    align-items: center;
+  }
+
+  .legend .swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .legend .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    display: inline-block;
+    transform: rotate(45deg);
+  }
+
+  .legend .dot.fixture { background: var(--amber); }
+  .legend .dot.decorator { background: var(--cyan); }
+  .legend .dot.component { background: #6fc8b8; }
+  .legend .dot.procedure { background: #d99a52; }
+  .legend .dot.handoff { background: var(--amber-strong); box-shadow: 0 0 6px rgba(255, 203, 125, 0.6); }
+  .legend .dot.spec { background: #8fb8cc; }
+  .legend .dot.note { background: transparent; border: 1px dashed var(--muted); transform: rotate(0deg); border-radius: 2px; }
+
+  main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .panel {
+    position: relative;
+    background: var(--ink-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .panel::before,
+  .panel::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--cyan-dim);
+    border-style: solid;
+    pointer-events: none;
+  }
+
+  .panel::before {
+    top: -1px;
+    left: -1px;
+    border-width: 1px 0 0 1px;
+  }
+
+  .panel::after {
+    bottom: -1px;
+    right: -1px;
+    border-width: 0 1px 1px 0;
+  }
+
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.85rem 1.15rem;
+    border-bottom: 1px solid var(--border-soft);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan-dim);
+  }
+
+  .panel-head span.rev {
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  #code {
+    display: block;
+    margin: 0;
+    padding: 1.25rem 1.4rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    line-height: 1.72;
+    color: #c7dde6;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  #code .kw { color: #7fd6e8; }
+  #code .fn { color: #a8e0d4; }
+  #code .str { color: #d9b988; }
+  #code .num { color: #e9c98a; }
+  #code .op { color: #8fa6b3; }
+  #code .dec { color: #7fd6e8; }
+  #code .com { color: #5f7889; font-style: italic; }
+
+  #code .tok {
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 0.02rem 0.05rem;
+    margin: -0.02rem -0.05rem;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    border-bottom: 1px dotted var(--cyan-dim);
+  }
+
+  #code .tok:hover {
+    background: rgba(127, 214, 232, 0.1);
+  }
+
+  #code .tok.active {
+    background: var(--amber-soft);
+    border-bottom: 1px solid var(--amber);
+    box-shadow: 0 0 0 1px rgba(242, 171, 78, 0.25);
+    color: var(--amber-strong);
+  }
+
+  #code .tok .tok.active {
+    color: var(--amber-strong);
+  }
+
+  #code .tok .str,
+  #code .tok .num,
+  #code .tok .fn,
+  #code .tok .kw,
+  #code .tok .dec,
+  #code .tok .com {
+    transition: color 0.15s ease;
+  }
+
+  #code .tok.active .str,
+  #code .tok.active .num,
+  #code .tok.active .fn,
+  #code .tok.active .kw,
+  #code .tok.active .dec {
+    color: var(--amber-strong);
+  }
+
+  .right {
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  #specPanel {
+    padding: 1.5rem 1.4rem 1.75rem;
+    min-height: 260px;
+  }
+
+  .placeholder {
+    color: var(--muted);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 220px;
+    border: 1px dashed var(--border-soft);
+    border-radius: 3px;
+    padding: 1.5rem;
+  }
+
+  .spec-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.6rem;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+    border: 1px solid;
+  }
+
+  .tag-fixture { color: var(--amber-strong); border-color: var(--amber); background: var(--amber-soft); }
+  .tag-decorator { color: var(--cyan); border-color: var(--cyan-dim); background: rgba(127, 214, 232, 0.1); }
+  .tag-component { color: #a8e0d4; border-color: rgba(111, 200, 184, 0.5); background: rgba(111, 200, 184, 0.1); }
+  .tag-procedure { color: #e3b57c; border-color: rgba(217, 154, 82, 0.5); background: rgba(217, 154, 82, 0.1); }
+  .tag-handoff { color: var(--amber-strong); border-color: var(--amber-strong); background: rgba(255, 203, 125, 0.16); box-shadow: 0 0 12px rgba(255, 203, 125, 0.15); }
+  .tag-spec { color: #a9cbdc; border-color: rgba(143, 184, 204, 0.5); background: rgba(143, 184, 204, 0.1); }
+  .tag-note { color: var(--muted); border-color: var(--border-soft); border-style: dashed; background: transparent; }
+
+  .spec-code {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--cream);
+    background: var(--ink-panel-2);
+    border: 1px solid var(--border-soft);
+    border-left: 2px solid var(--amber);
+    border-radius: 2px;
+    padding: 0.8rem 0.95rem;
+    margin: 0 0 1.1rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .spec-text {
+    font-family: var(--serif);
+    font-size: 1.02rem;
+    line-height: 1.65;
+    color: var(--prose);
+    margin: 0;
+  }
+
+  footer {
+    margin-top: 2rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 880px) {
+    main {
+      grid-template-columns: 1fr;
+    }
+    .right {
+      position: static;
+    }
+    .wrap {
+      padding: 1.5rem 1.1rem 3rem;
+    }
+    #code {
+      font-size: 0.78rem;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Blueprint / conftest.py / rev. A</p>
+    <h1>Appium Blueprint Explainer</h1>
+    <p class="instruction">You are the architect designing a drive-thru intercom system, not the crew running it. Click any highlighted term in the blueprint to view its spec.</p>
+    <div class="legend">
+      <span class="swatch"><span class="dot fixture"></span>Fixture</span>
+      <span class="swatch"><span class="dot decorator"></span>Decorator</span>
+      <span class="swatch"><span class="dot component"></span>Component</span>
+      <span class="swatch"><span class="dot procedure"></span>Procedure</span>
+      <span class="swatch"><span class="dot handoff"></span>Handoff</span>
+      <span class="swatch"><span class="dot spec"></span>Spec</span>
+      <span class="swatch"><span class="dot note"></span>Note</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="panel-head"><span>Sheet 01 — Intercom Fixtures</span><span class="rev">conftest.py</span></div>
+      <pre id="code">import <span class="tok" data-tok="imp-pytest"><span class="fn">pytest</span></span>
+
+<span class="tok" data-tok="imp-webdriver"><span class="kw">from</span> appium <span class="kw">import</span> <span class="fn">webdriver</span></span>
+
+<span class="tok" data-tok="imp-xcuioptions"><span class="kw">from</span> appium.options.ios <span class="kw">import</span> <span class="fn">XCUITestOptions</span></span>
+
+<span class="tok" data-tok="imp-appiumservice"><span class="kw">from</span> appium.webdriver.appium_service <span class="kw">import</span> <span class="fn">AppiumService</span></span>
+
+<span class="tok" data-tok="const-host">APPIUM_HOST <span class="op">=</span> <span class="str">"127.0.0.1"</span></span>
+
+<span class="tok" data-tok="const-port">APPIUM_PORT <span class="op">=</span> <span class="num">4723</span></span>
+
+
+<span class="tok" data-tok="decorator-session"><span class="dec">@pytest.fixture</span>(scope=<span class="str">"session"</span>)</span>
+<span class="tok" data-tok="fixture-appium-service"><span class="kw">def</span> appium_service():</span>
+    <span class="tok" data-tok="docstring"><span class="str">"""Optional: manage the server lifecycle from pytest instead of assuming it's already running."""</span></span>
+    <span class="tok" data-tok="instantiate-service">service <span class="op">=</span> <span class="fn">AppiumService</span>()</span>
+    <span class="tok" data-tok="service-start">service.<span class="fn">start</span>(args=[<span class="tok" data-tok="flag-address"><span class="str">"--address"</span></span>, <span class="tok" data-tok="const-host">APPIUM_HOST</span>, <span class="tok" data-tok="flag-p"><span class="str">"-p"</span></span>, str(<span class="tok" data-tok="const-port">APPIUM_PORT</span>)], <span class="tok" data-tok="timeout-ms">timeout_ms=<span class="num">20000</span></span>)</span>
+    <span class="tok" data-tok="yield-service"><span class="kw">yield</span> service</span>
+    <span class="tok" data-tok="service-stop">service.<span class="fn">stop</span>()</span>
+
+
+<span class="tok" data-tok="decorator-function"><span class="dec">@pytest.fixture</span>(scope=<span class="str">"function"</span>)</span>
+<span class="tok" data-tok="fixture-driver"><span class="kw">def</span> driver(appium_service):</span>
+    <span class="tok" data-tok="options-instantiate">options <span class="op">=</span> <span class="fn">XCUITestOptions</span>()</span>
+    <span class="tok" data-tok="options-platform">options.platform_name <span class="op">=</span> <span class="str">"iOS"</span></span>
+    <span class="tok" data-tok="options-device">options.device_name <span class="op">=</span> <span class="str">"iPhone 16 Pro"</span></span>
+    <span class="tok" data-tok="options-app">options.app <span class="op">=</span> <span class="str">"/Users/viradeth/Desktop/SDET_MASTER/StageTimePNW.app"</span></span>
+
+    <span class="tok" data-tok="automation-name-comment"><span class="com"># automation_name defaults to XCUITest already inside XCUITestOptions,
+    # so that line is redundant but harmless</span></span>
+
+    <span class="tok" data-tok="driver-remote">driver <span class="op">=</span> webdriver.<span class="fn">Remote</span>(<span class="str">f"http://{</span><span class="tok" data-tok="const-host">APPIUM_HOST</span><span class="str">}:{</span><span class="tok" data-tok="const-port">APPIUM_PORT</span><span class="str">}"</span>, options=options)</span>
+    <span class="tok" data-tok="yield-driver"><span class="kw">yield</span> driver</span>
+    <span class="tok" data-tok="driver-quit">driver.<span class="fn">quit</span>()</span></pre>
+    </section>
+
+    <section class="right">
+      <div class="panel" id="specPanel">
+        <div class="placeholder">No spec selected — click any highlighted term in the blueprint to view its spec.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Appium Blueprint Explainer — the reader is the architect, not the crew</footer>
+</div>
+
+<script>
+  var EXPLANATIONS = {
+    "imp-pytest": {
+      tag: "COMPONENT",
+      code: "import pytest",
+      text: "You're pulling the inspection framework onto the drafting table. Pytest is the code inspector that will walk your finished intercom blueprint, run every fixture in order, and flag anything that doesn't meet spec — it isn't part of the intercom itself, it's how you verify the build."
+    },
+    "imp-webdriver": {
+      tag: "COMPONENT",
+      code: "from appium import webdriver",
+      text: "This pulls in the car-to-speaker connector: the client library that knows how to open a live link between a car and the intercom speaker, no matter which vehicle shows up to order."
+    },
+    "imp-xcuioptions": {
+      tag: "COMPONENT",
+      code: "from appium.options.ios import XCUITestOptions",
+      text: "This pulls in the blank order-ticket template — a structured form for specifying exactly which vehicle and which menu build the intercom should expect before a car ever pulls up to the speaker."
+    },
+    "imp-appiumservice": {
+      tag: "COMPONENT",
+      code: "from appium.webdriver.appium_service import AppiumService",
+      text: "This imports the intercom hardware class itself — the schematic for the physical unit you're about to draft, commission, and eventually power down. Nothing is built yet; you've only brought the blueprint to the table."
+    },
+    "const-host": {
+      tag: "SPEC",
+      code: 'APPIUM_HOST = "127.0.0.1"',
+      text: "This is the building and lane the intercom is wired to. 127.0.0.1 is the loopback address, so this intercom only ever talks to cars parked on this same lot — never a remote location across town."
+    },
+    "const-port": {
+      tag: "SPEC",
+      code: "APPIUM_PORT = 4723",
+      text: "This is the channel the intercom broadcasts on. Every car and every piece of infrastructure needs to be tuned to 4723, or the speaker and the vehicle simply never hear each other."
+    },
+    "decorator-session": {
+      tag: "DECORATOR",
+      code: '@pytest.fixture(scope="session")',
+      text: "This is the permit stamped on the blueprint below: build this infrastructure once at the start of the shift and tear it down once at the end. It never gets rebuilt per car — that would be like re-pouring the intercom's foundation for every single order."
+    },
+    "fixture-appium-service": {
+      tag: "FIXTURE",
+      code: "def appium_service():",
+      text: "This names the infrastructure blueprint itself. Everything indented beneath it describes how to draft, commission, and eventually decommission the physical intercom unit that will serve the entire shift."
+    },
+    "docstring": {
+      tag: "NOTE",
+      code: '"""Optional: manage the server lifecycle from pytest instead of assuming it\'s already running."""',
+      text: "A margin note on the blueprint: this whole fixture is optional. If another crew already has the intercom infrastructure standing and running before your shift starts, you don't need to draft or commission it yourself — just wire your cars to what's already live."
+    },
+    "instantiate-service": {
+      tag: "COMPONENT",
+      code: "service = AppiumService()",
+      text: "This drafts the physical intercom unit and sets it on the table. The unit exists now, fully specified, but it isn't powered on yet — no car can talk to it until the next step commissions it."
+    },
+    "service-start": {
+      tag: "PROCEDURE",
+      code: 'service.start(args=["--address", APPIUM_HOST, "-p", str(APPIUM_PORT)], timeout_ms=20000)',
+      text: "This is the commissioning procedure — the moment the intercom unit actually powers on and starts listening at its assigned lane and channel. Click the highlighted pieces inside this line for what each setting controls."
+    },
+    "flag-address": {
+      tag: "SPEC",
+      code: '"--address"',
+      text: "The flag that tells the commissioning crew which value that follows is the lane — the host — to wire this intercom unit to."
+    },
+    "flag-p": {
+      tag: "SPEC",
+      code: '"-p"',
+      text: "The flag that tells the commissioning crew which value that follows is the channel — the port — to tune this intercom unit to."
+    },
+    "timeout-ms": {
+      tag: "SPEC",
+      code: "timeout_ms=20000",
+      text: "How long the crew will wait for the intercom to finish booting before giving up and flagging a failed commissioning. Here, twenty seconds."
+    },
+    "yield-service": {
+      tag: "HANDOFF",
+      code: "yield service",
+      text: "This is the handoff point: the store is now open and running for the whole shift. Every car that pulls up between here and the closing procedure gets to use this same live, already-commissioned intercom."
+    },
+    "service-stop": {
+      tag: "PROCEDURE",
+      code: "service.stop()",
+      text: "The closing procedure — power the intercom unit down at the end of the shift. This runs once, after every car for the session has already been served."
+    },
+    "decorator-function": {
+      tag: "DECORATOR",
+      code: '@pytest.fixture(scope="function")',
+      text: "This permit says the opposite of the session one: build a fresh instance of what's below for every single car. Nothing here is shared between visits — each car gets its own brand-new setup, torn down the moment it leaves."
+    },
+    "fixture-driver": {
+      tag: "FIXTURE",
+      code: "def driver(appium_service):",
+      text: "This names a single car's visit to the speaker. It depends on the infrastructure blueprint above — pytest hands this fixture the already-commissioned intercom before the car is even allowed to pull forward."
+    },
+    "options-instantiate": {
+      tag: "COMPONENT",
+      code: "options = XCUITestOptions()",
+      text: "A blank order ticket is pulled off the pad for this specific car — the template exists, but no vehicle details have been filled in yet."
+    },
+    "options-platform": {
+      tag: "SPEC",
+      code: 'options.platform_name = "iOS"',
+      text: "The vehicle-type field on the order ticket. Marking it iOS tells the intercom which category of build instructions applies to this car before it even reaches the window."
+    },
+    "options-device": {
+      tag: "SPEC",
+      code: 'options.device_name = "iPhone 16 Pro"',
+      text: "The exact-model field on the ticket — not just any car, specifically an iPhone 16 Pro, so the device queue knows precisely which vehicle to pull around to the speaker."
+    },
+    "options-app": {
+      tag: "SPEC",
+      code: 'options.app = "/Users/viradeth/Desktop/SDET_MASTER/StageTimePNW.app"',
+      text: "Which menu — which app build — this car should be served. This path points the intercom at the exact StageTimePNW build to load for the order."
+    },
+    "automation-name-comment": {
+      tag: "NOTE",
+      code: "# automation_name defaults to XCUITest already inside XCUITestOptions,\n# so that line is redundant but harmless",
+      text: "A margin note on the blueprint: the order-ticket template already assumes XCUITest by default, so writing that field again wouldn't change anything served — harmless, just extra ink on the page."
+    },
+    "driver-remote": {
+      tag: "HANDOFF",
+      code: 'driver = webdriver.Remote(f"http://{APPIUM_HOST}:{APPIUM_PORT}", options=options)',
+      text: "The car pulls up to the speaker and connects. The connector opens a live link to the intercom at its wired lane and channel, handing over the completed order ticket as it does."
+    },
+    "yield-driver": {
+      tag: "HANDOFF",
+      code: "yield driver",
+      text: "The car is now at the window being served — this is the live handoff point where the actual test body runs against a fully connected car."
+    },
+    "driver-quit": {
+      tag: "PROCEDURE",
+      code: "driver.quit()",
+      text: "The car pulls away and the lane is wiped clean. Because this sits after the yield in a fixture, pytest guarantees it runs even if the test itself crashes, so a failed order never leaves the lane blocked."
+    }
+  };
+
+  var codeEl = document.getElementById("code");
+  var specPanel = document.getElementById("specPanel");
+
+  codeEl.addEventListener("click", function (event) {
+    var tok = event.target.closest(".tok");
+    if (!tok || !codeEl.contains(tok)) {
+      return;
+    }
+    var key = tok.getAttribute("data-tok");
+    var spec = EXPLANATIONS[key];
+    if (!spec) {
+      return;
+    }
+
+    var allTokens = codeEl.querySelectorAll(".tok");
+    for (var i = 0; i < allTokens.length; i++) {
+      allTokens[i].classList.remove("active");
+    }
+    var matches = codeEl.querySelectorAll('.tok[data-tok="' + key + '"]');
+    for (var j = 0; j < matches.length; j++) {
+      matches[j].classList.add("active");
+    }
+
+    renderSpec(spec);
+  });
+
+  function renderSpec(spec) {
+    var tagClass = "tag-" + spec.tag.toLowerCase();
+    specPanel.innerHTML =
+      '<div class="spec-tag ' + tagClass + '">' + escapeHtml(spec.tag) + "</div>" +
+      '<pre class="spec-code">' + escapeHtml(spec.code) + "</pre>" +
+      '<p class="spec-text">' + escapeHtml(spec.text) + "</p>";
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
