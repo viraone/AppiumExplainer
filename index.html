@@ -56,6 +56,31 @@
     margin-bottom: 1.75rem;
   }
 
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--ink-panel-2);
+    border: 1px solid var(--border-soft);
+    border-bottom: 0;
+    border-radius: 3px 3px 0 0;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+  }
+
+  .tab:hover { color: var(--cyan); border-color: var(--cyan-dim); }
+  .tab.active { color: var(--amber-strong); border-color: var(--amber); background: var(--amber-soft); }
+  .tab-view[hidden] { display: none; }
+
   .kicker {
     font-family: var(--mono);
     font-size: 0.72rem;
@@ -183,6 +208,12 @@
     white-space: pre;
     overflow-x: auto;
   }
+
+  #testsCode { display: block; margin: 0; padding: 1.25rem 1.4rem 1.5rem; font-family: var(--mono); font-size: 0.86rem; line-height: 1.72; color: #c7dde6; white-space: pre; overflow-x: auto; }
+  #testsCode .kw { color: #7fd6e8; } #testsCode .fn { color: #a8e0d4; } #testsCode .str { color: #d9b988; } #testsCode .num { color: #e9c98a; } #testsCode .op { color: #8fa6b3; } #testsCode .com { color: #5f7889; font-style: italic; }
+  #testsCode .tok { cursor: pointer; border-radius: 3px; padding: 0.02rem 0.05rem; margin: -0.02rem -0.05rem; transition: background 0.15s ease, box-shadow 0.15s ease; border-bottom: 1px dotted var(--cyan-dim); }
+  #testsCode .tok:hover { background: rgba(127, 214, 232, 0.1); }
+  #testsCode .tok.active { background: var(--amber-soft); border-bottom: 1px solid var(--amber); box-shadow: 0 0 0 1px rgba(242, 171, 78, 0.25); color: var(--amber-strong); }
 
   #code .kw { color: #7fd6e8; }
   #code .fn { color: #a8e0d4; }
@@ -386,6 +417,9 @@
     #code {
       font-size: 0.78rem;
     }
+    #testsCode { font-size: 0.78rem; }
+    .tabs { overflow-x: auto; }
+    .tab { white-space: nowrap; }
   }
 </style>
 
@@ -405,7 +439,12 @@
     </div>
   </header>
 
-  <main>
+  <nav class="tabs" role="tablist" aria-label="Appium explainer sections">
+    <button class="tab active" id="tab-fixtures" role="tab" aria-selected="true" aria-controls="fixturesView" data-tab="fixturesView">01 — Fixtures</button>
+    <button class="tab" id="tab-tests" role="tab" aria-selected="false" aria-controls="testsView" data-tab="testsView">02 — Sign-In &amp; Sign-Up Tests</button>
+  </nav>
+
+  <main id="fixturesView" class="tab-view" role="tabpanel" aria-labelledby="tab-fixtures">
     <section class="panel">
       <div class="panel-head"><span>Sheet 01 — Kiosk Sign-Up Fixtures</span><span class="rev">conftest.py</span></div>
       <pre id="code">import <span class="tok" data-tok="imp-pytest"><span class="fn">pytest</span></span>
@@ -448,6 +487,75 @@
     <section class="right">
       <div class="panel" id="specPanel">
         <div class="placeholder">No spec selected — click any highlighted term in the blueprint to view its spec.</div>
+      </div>
+    </section>
+  </main>
+
+  <main id="testsView" class="tab-view" role="tabpanel" aria-labelledby="tab-tests" hidden>
+    <section class="panel">
+      <div class="panel-head"><span>Sheet 02 — Sign-In &amp; Sign-Up Verification</span><span class="rev">test_auth.py</span></div>
+      <pre id="testsCode"><span class="tok" data-test-tok="imports"><span class="kw">import</span> pytest
+<span class="kw">from</span> appium.webdriver.common.appiumby <span class="kw">import</span> AppiumBy
+<span class="kw">from</span> selenium.webdriver.support.ui <span class="kw">import</span> WebDriverWait
+<span class="kw">from</span> selenium.webdriver.support <span class="kw">import</span> expected_conditions <span class="kw">as</span> EC</span>
+
+<span class="tok" data-test-tok="signin-test"><span class="kw">def</span> <span class="fn">test_signin_screen_components_load</span>(driver):</span>
+    <span class="tok" data-test-tok="signin-doc"><span class="str">"""Verify the initial SignInView and its critical interactive components."""</span></span>
+    <span class="tok" data-test-tok="wait">wait <span class="op">=</span> <span class="fn">WebDriverWait</span>(driver, <span class="num">15</span>)</span>
+
+    <span class="com"># Scope the header to StaticText to avoid matching the button.</span>
+    <span class="tok" data-test-tok="header-predicate">header_predicate <span class="op">=</span> <span class="str">'type == "XCUIElementTypeStaticText" AND label == "Sign in"'</span></span>
+    <span class="tok" data-test-tok="wait-visible">header <span class="op">=</span> wait.until(
+        EC.visibility_of_element_located((AppiumBy.IOS_PREDICATE, header_predicate))
+    )</span>
+    <span class="tok" data-test-tok="assert-header"><span class="kw">assert</span> header.is_displayed(), <span class="str">"Sign in screen header is not visible."</span></span>
+
+    <span class="tok" data-test-tok="button-predicate">button_predicate <span class="op">=</span> <span class="str">'type == "XCUIElementTypeButton" AND label == "Sign in"'</span></span>
+    <span class="tok" data-test-tok="wait-clickable">signin_button <span class="op">=</span> wait.until(
+        EC.element_to_be_clickable((AppiumBy.IOS_PREDICATE, button_predicate))
+    )</span>
+    <span class="tok" data-test-tok="assert-button"><span class="kw">assert</span> signin_button.is_enabled(), <span class="str">"Primary 'Sign in' button is disabled."</span></span>
+
+    <span class="tok" data-test-tok="footer-predicate">footer_predicate <span class="op">=</span> <span class="str">'label CONTAINS "Don\'t have an account?"'</span></span>
+    <span class="tok" data-test-tok="footer-wait">footer_prompt <span class="op">=</span> wait.until(
+        EC.visibility_of_element_located((AppiumBy.IOS_PREDICATE, footer_predicate))
+    )</span>
+    <span class="tok" data-test-tok="assert-footer"><span class="kw">assert</span> footer_prompt.is_displayed(), <span class="str">"Footer sign-up link prompt is not visible."</span></span>
+    <span class="tok" data-test-tok="signin-success"><span class="fn">print</span>(<span class="str">"\n✅ Day 1 Session Successful: StageTimePNW SignInView fully verified!"</span>)</span>
+
+
+<span class="tok" data-test-tok="signup-test"><span class="kw">def</span> <span class="fn">test_successful_signup_flow</span>(driver):</span>
+    <span class="tok" data-test-tok="signup-doc"><span class="str">"""Verify a new user can sign up and reach the welcome screen."""</span></span>
+    <span class="tok" data-test-tok="wait">wait <span class="op">=</span> <span class="fn">WebDriverWait</span>(driver, <span class="num">15</span>)</span>
+
+    <span class="tok" data-test-tok="email-predicate">email_predicate <span class="op">=</span> <span class="str">'type == "XCUIElementTypeTextField" AND name == "email_input"'</span></span>
+    <span class="tok" data-test-tok="email-action">email_field <span class="op">=</span> wait.until(
+        EC.visibility_of_element_located((AppiumBy.IOS_PREDICATE, email_predicate))
+    )
+    email_field.send_keys(<span class="str">"[email protected]"</span>)</span>
+
+    <span class="tok" data-test-tok="password-predicate">password_predicate <span class="op">=</span> <span class="str">'type == "XCUIElementTypeSecureTextField" AND name == "password_input"'</span></span>
+    <span class="tok" data-test-tok="password-action">password_field <span class="op">=</span> wait.until(
+        EC.visibility_of_element_located((AppiumBy.IOS_PREDICATE, password_predicate))
+    )
+    password_field.send_keys(<span class="str">"TestPass123!"</span>)</span>
+
+    <span class="tok" data-test-tok="signup-predicate">signup_predicate <span class="op">=</span> <span class="str">'type == "XCUIElementTypeButton" AND label == "Sign up"'</span></span>
+    <span class="tok" data-test-tok="signup-action">signup_button <span class="op">=</span> wait.until(
+        EC.element_to_be_clickable((AppiumBy.IOS_PREDICATE, signup_predicate))
+    )
+    signup_button.click()</span>
+
+    <span class="tok" data-test-tok="welcome-predicate">welcome_predicate <span class="op">=</span> <span class="str">'type == "XCUIElementTypeStaticText" AND label == "Welcome"'</span></span>
+    <span class="tok" data-test-tok="welcome-assert">welcome_header <span class="op">=</span> wait.until(
+        EC.visibility_of_element_located((AppiumBy.IOS_PREDICATE, welcome_predicate))
+    )
+    <span class="kw">assert</span> welcome_header.is_displayed(), <span class="str">"Welcome screen header is not visible after sign-up."</span></span>
+    <span class="tok" data-test-tok="signup-success"><span class="fn">print</span>(<span class="str">"\n✅ Day 1 Session Successful: StageTimePNW Sign-Up Flow fully verified!"</span>)</span></pre>
+    </section>
+    <section class="right">
+      <div class="panel" id="testsSpecPanel">
+        <div class="placeholder">No spec selected — click any highlighted term in the test to view its explanation.</div>
       </div>
     </section>
   </main>
@@ -615,6 +723,46 @@
     }
   };
 
+  var TEST_EXPLANATIONS = {
+    "imports": { tag: "COMPONENT", code: "pytest · AppiumBy · WebDriverWait · EC", text: "These are the inspector's tools: the checklist runner, the label-reading locator, the timer, and a set of conditions that decide when each kiosk part is ready.", cs: "pytest discovers and runs the tests. AppiumBy supplies Appium locator strategies, WebDriverWait performs explicit polling, and expected_conditions provides reusable predicates for visibility and clickability." },
+    "signin-test": { tag: "PROCEDURE", code: "def test_signin_screen_components_load(driver):", text: "This blueprint describes one complete inspection of the kiosk's opening sign-in screen. The ready-to-use kiosk session is handed in as driver.", cs: "pytest discovers the test_ prefix automatically and resolves driver through fixture injection. Each test receives a fresh WebDriver session from conftest.py." },
+    "signin-doc": { tag: "NOTE", code: "Verify the initial SignInView and its critical interactive components.", text: "A margin note that defines this inspection's boundary: the screen must open with the essential sign-in controls present.", cs: "The function docstring documents test intent. It does not affect execution, but appears in IDEs and reporting tools that expose docstrings." },
+    "wait": { tag: "COMPONENT", code: "wait = WebDriverWait(driver, 15)", text: "The inspector will allow each kiosk component up to fifteen seconds to appear instead of checking too early and failing a healthy build.", cs: "Creates an explicit wait bound to the driver. until() polls a condition until it returns a truthy value or raises TimeoutException after 15 seconds." },
+    "header-predicate": { tag: "SPEC", code: "type == StaticText AND label == Sign in", text: "The blueprint calls for text reading “Sign in,” specifically a printed heading—not the nearby button with the same wording.", cs: "An iOS class-chain predicate filters the accessibility tree by both XCUIElementTypeStaticText and exact label, preventing an ambiguous match with the button." },
+    "wait-visible": { tag: "PROCEDURE", code: "visibility_of_element_located(...)", text: "The inspector repeatedly looks for the heading and only proceeds once it both exists and can actually be seen.", cs: "The expected condition repeatedly locates the element and verifies is_displayed(). On success, until() returns the WebElement itself." },
+    "assert-header": { tag: "SPEC", code: "assert header.is_displayed()", text: "The inspection fails with a useful note if the sign-in heading is not visibly mounted on the kiosk.", cs: "A pytest assertion checks the final invariant. The second expression becomes the failure message when the condition is false." },
+    "button-predicate": { tag: "SPEC", code: "type == Button AND label == Sign in", text: "This time the same wording must belong to the actual pressable sign-in control.", cs: "The predicate combines element type and accessible label to select the primary button precisely." },
+    "wait-clickable": { tag: "PROCEDURE", code: "element_to_be_clickable(...)", text: "The inspector waits until the sign-in control is both visible and enabled—ready for a visitor to press.", cs: "Selenium's clickability condition requires the located element to be displayed and enabled, then returns it for later use." },
+    "assert-button": { tag: "SPEC", code: "assert signin_button.is_enabled()", text: "A final explicit check records that the kiosk's primary action is not disabled.", cs: "Validates the enabled state and supplies a targeted assertion message. It also makes the intended contract obvious to readers." },
+    "footer-predicate": { tag: "SPEC", code: "label CONTAINS Don't have an account?", text: "The footer may include extra words, but it must contain the prompt that directs new visitors toward registration.", cs: "CONTAINS performs substring matching on the accessibility label, making the locator tolerant of the appended “Sign up” text." },
+    "footer-wait": { tag: "PROCEDURE", code: "visibility_of_element_located(footer predicate)", text: "The inspection waits for the registration prompt to become visible before passing this checkpoint.", cs: "Polls the iOS accessibility tree with the footer predicate until a displayed matching element is returned." },
+    "assert-footer": { tag: "SPEC", code: "assert footer_prompt.is_displayed()", text: "The kiosk fails inspection if a new visitor cannot see how to reach sign-up.", cs: "Asserts the returned element remains displayed and reports a domain-specific error if it is not." },
+    "signin-success": { tag: "NOTE", code: "Day 1 Session Successful: SignInView fully verified!", text: "The inspection log receives a clear completion stamp after every sign-in-screen checkpoint passes.", cs: "print writes a human-readable success marker. It does not determine pass/fail; reaching this line means earlier waits and assertions succeeded." },
+    "signup-test": { tag: "PROCEDURE", code: "def test_successful_signup_flow(driver):", text: "This second blueprint follows a visitor through the whole registration journey, from credentials to the welcome screen.", cs: "A separate pytest test isolates the sign-up user journey. The driver fixture supplies its Appium session and teardown." },
+    "signup-doc": { tag: "NOTE", code: "Verify a new user can sign up and reach the welcome screen.", text: "The acceptance goal is written directly on the sheet: a completed form must lead to Welcome.", cs: "A concise behavioral docstring states the test's precondition, action, and expected outcome." },
+    "email-predicate": { tag: "SPEC", code: "TextField AND name == email_input", text: "The inspector finds the ordinary text entry slot identified by the stable internal name email_input.", cs: "Matches an XCUIElementTypeTextField by accessibility identifier/name. A stable identifier is generally less brittle than coordinates or visible text." },
+    "email-action": { tag: "PROCEDURE", code: "wait for email field · send_keys(email)", text: "Once the email slot is visible, the inspector types the test visitor's address into it.", cs: "The explicit wait returns the field element; send_keys sends text input through the active Appium session." },
+    "password-predicate": { tag: "SPEC", code: "SecureTextField AND name == password_input", text: "The password must go into the concealed-entry slot, located by its stable internal name.", cs: "XCUIElementTypeSecureTextField distinguishes protected password input from normal text fields while name targets its accessibility identifier." },
+    "password-action": { tag: "PROCEDURE", code: "wait for password field · send_keys(password)", text: "The inspector waits for the protected slot and enters the test password.", cs: "Locates a visible secure field and sends keyboard input. The literal is test data and should normally come from a fixture or configuration in larger suites." },
+    "signup-predicate": { tag: "SPEC", code: "Button AND label == Sign up", text: "The submit control must be a real button carrying the exact “Sign up” label.", cs: "Combining XCUIElementTypeButton with an exact label prevents matching noninteractive text or other controls." },
+    "signup-action": { tag: "PROCEDURE", code: "wait until clickable · click()", text: "The inspector waits until submission is safe, then presses the sign-up control to send the form.", cs: "element_to_be_clickable guards against timing issues; click sends a WebDriver element command that XCUITest performs on the device." },
+    "welcome-predicate": { tag: "SPEC", code: "StaticText AND label == Welcome", text: "The arrival marker is visible text reading “Welcome,” which proves the kiosk moved beyond registration.", cs: "An exact type-and-label predicate identifies the destination screen's heading in the iOS accessibility hierarchy." },
+    "welcome-assert": { tag: "HANDOFF", code: "wait for Welcome · assert displayed", text: "This is the journey's handoff: the visitor has left the form and arrived at the welcome screen. If it never appears, the flow fails.", cs: "The wait synchronizes with navigation and returns the heading. The assertion expresses the end-to-end postcondition for successful registration." },
+    "signup-success": { tag: "NOTE", code: "Day 1 Session Successful: Sign-Up Flow fully verified!", text: "A completion stamp is printed only after the visitor reaches Welcome and every checkpoint has passed.", cs: "A diagnostic console message reached only on the success path; pytest's actual result still comes from uncaught exceptions and assertions." }
+  };
+
+  var tabs = document.querySelectorAll(".tab");
+  for (var tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
+    tabs[tabIndex].addEventListener("click", function () {
+      for (var i = 0; i < tabs.length; i++) {
+        var selected = tabs[i] === this;
+        tabs[i].classList.toggle("active", selected);
+        tabs[i].setAttribute("aria-selected", selected ? "true" : "false");
+        document.getElementById(tabs[i].getAttribute("data-tab")).hidden = !selected;
+      }
+    });
+  }
+
   var codeEl = document.getElementById("code");
   var specPanel = document.getElementById("specPanel");
   var currentSpec = null;
@@ -686,5 +834,47 @@
     var div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  var testsCodeEl = document.getElementById("testsCode");
+  var testsSpecPanel = document.getElementById("testsSpecPanel");
+  var testsCurrentSpec = null;
+  var testsViewMode = "both";
+
+  testsSpecPanel.addEventListener("click", function (event) {
+    var btn = event.target.closest("[data-test-view]");
+    if (!btn) return;
+    testsViewMode = btn.getAttribute("data-test-view");
+    if (testsCurrentSpec) renderTestSpec(testsCurrentSpec);
+  });
+
+  testsCodeEl.addEventListener("click", function (event) {
+    var tok = event.target.closest(".tok");
+    if (!tok || !testsCodeEl.contains(tok)) return;
+    var key = tok.getAttribute("data-test-tok");
+    var spec = TEST_EXPLANATIONS[key];
+    if (!spec) return;
+    var all = testsCodeEl.querySelectorAll(".tok");
+    for (var i = 0; i < all.length; i++) all[i].classList.remove("active");
+    var matches = testsCodeEl.querySelectorAll('.tok[data-test-tok="' + key + '"]');
+    for (var j = 0; j < matches.length; j++) matches[j].classList.add("active");
+    renderTestSpec(spec);
+  });
+
+  function renderTestSpec(spec) {
+    testsCurrentSpec = spec;
+    testsSpecPanel.className = "panel view-" + testsViewMode;
+    testsSpecPanel.innerHTML =
+      '<div class="view-toggle" role="group" aria-label="Explanation view">' +
+        testToggle("both", "Both") + testToggle("blueprint", "Blueprint only") + testToggle("cs", "CS only") +
+      '</div><div class="spec-tag tag-' + spec.tag.toLowerCase() + '">' + escapeHtml(spec.tag) + '</div>' +
+      '<pre class="spec-code">' + escapeHtml(spec.code) + '</pre>' +
+      '<div class="explain-block explain-blueprint"><p class="explain-label">Kiosk Blueprint</p><p class="spec-text">' + escapeHtml(spec.text) + '</p></div>' +
+      '<div class="explain-block explain-cs"><p class="explain-label">Standard CS Explanation</p><p class="spec-text">' + escapeHtml(spec.cs) + '</p></div>';
+  }
+
+  function testToggle(mode, label) {
+    return '<button type="button" data-test-view="' + mode + '"' +
+      (testsViewMode === mode ? ' class="on" aria-pressed="true"' : ' aria-pressed="false"') + '>' + label + '</button>';
   }
 </script>
